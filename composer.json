@@ -1,0 +1,47 @@
+{
+    "name": "planx/laravel-shipping",
+    "description": "Pluggable shipping manager for Laravel. Drivers: Alonomic, Tinex (Next One), SnappBox, and Forward.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "laravel",
+        "shipping",
+        "alonomic",
+        "alopeyk",
+        "tinex",
+        "nextone",
+        "snappbox",
+        "courier"
+    ],
+    "authors": [
+        {
+            "name": "Mapr",
+            "homepage": "https://github.com/mapr"
+        }
+    ],
+    "require": {
+        "php": ">=8.2",
+        "guzzlehttp/guzzle": "^7.0",
+        "illuminate/support": "^10.0|^11.0|^12.0",
+        "illuminate/contracts": "^10.0|^11.0|^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Planx\\Shipping\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Planx\\Shipping\\Providers\\ShippingServiceProvider"
+            ],
+            "aliases": {
+                "Shipping": "Planx\\Shipping\\Facades\\Shipping"
+            }
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
+
+
