@@ -15,8 +15,9 @@
     ],
     "authors": [
         {
-            "name": "Mapr",
-            "homepage": "https://github.com/mapr"
+            "name": "Amin Pr (devmapr)",
+            "email": "dev.mapr@gmail.com",
+            "homepage": "https://github.com/devmapr"
         }
     ],
     "require": {

@@ -1,42 +1,66 @@
-# Laravel Shipping Manager
+<p align="center">
+    <h1 align="center">Laravel Shipping Manager</h1>
+    <p align="center">A pluggable, multi-driver shipping manager for Laravel.</p>
+</p>
 
-> Pluggable shipping driver manager for Laravel.
+<p align="center">
+    <a href="https://packagist.org/packages/devmapr/laravel-shipping"><img src="https://img.shields.io/packagist/v/devmapr/laravel-shipping" alt="Latest Version"></a>
+    <a href="https://packagist.org/packages/devmapr/laravel-shipping"><img src="https://img.shields.io/packagist/dt/devmapr/laravel-shipping" alt="Total Downloads"></a>
+    <a href="https://packagist.org/packages/devmapr/laravel-shipping"><img src="https://img.shields.io/packagist/l/devmapr/laravel-shipping" alt="License"></a>
+    <a href="https://github.com/devmapr/laravel-shipping"><img src="https://img.shields.io/github/stars/devmapr/laravel-shipping" alt="GitHub Stars"></a>
+</p>
 
-## Drivers
+---
 
-| Driver | Provider | Status |
-|--------|----------|--------|
-| **Alonomic** (Alopeyk) | `Planx\Shipping\Drivers\AlonomicDriver` | ✅ Active |
-| **Tinex** (Next One) | `Planx\Shipping\Drivers\TinexDriver` | ✅ Active |
-| **SnappBox** | `Planx\Shipping\Drivers\SnappBoxDriver` | ✅ Active (Webhook) |
-| **Forward** | `Planx\Shipping\Drivers\ForwardDriver` | ✅ Active |
+## Features
+
+- 🚚 **Multi-driver** — Switch between courier providers with zero code changes
+- 🔌 **Pluggable** — Add custom drivers via a simple interface
+- 📦 **Laravel Auto-Discovery** — Service provider and facade registered automatically
+- 🕸 **Webhook Support** — Receive real-time delivery status updates (SnappBox)
+- 🧪 **Easy to test** — Designed for testability and SOLID principles
+
+## Supported Drivers
+
+| Driver | Provider | Type | Status |
+|--------|----------|------|--------|
+| **Alonomic** | [Alopeyk](https://alopeyk.com) | Courier API | ✅ Active |
+| **Tinex** | [Next One](https://tinextco.com) | Courier API | ✅ Active |
+| **SnappBox** | SnappBox | Courier + Webhook | ✅ Active |
+| **Forward** | Forward | Courier API | ✅ Active |
+
+---
 
 ## Installation
 
 ```bash
-composer require planx/laravel-shipping
+composer require devmapr/laravel-shipping
 ```
+
+> **Laravel Auto-Discovery** automatically registers the service provider and facade. No manual steps needed.
 
 ## Configuration
 
-Publish the config file:
+### 1. Publish the config file
 
 ```bash
 php artisan vendor:publish --tag=shipping-config
 ```
 
-Then set your environment variables in `.env`:
+### 2. Set environment variables
+
+Add the following to your `.env` file based on the drivers you need:
 
 ```env
-# Default driver
-SHIPPING_DRIVER=snappbox
+# ─── Default Driver ───────────────────────────────────
+SHIPPING_DRIVER=tinex
 
-# SnappBox
-SNAPPBOX_ACTIVE=true
-SNAPPBOX_API_BASE_URL=https://api.snappbox.com
-SNAPPBOX_WEBHOOK_TOKEN=your-webhook-token
+# ─── Alonomic (Alopeyk) ───────────────────────────────
+ALONOMIC_ACTIVE=true
+ALONOMIC_EMAIL=your@email.com
+ALONOMIC_PASSWORD=your-password
 
-# Tinex (Next One)
+# ─── Tinex (Next One) ─────────────────────────────────
 TINEX_ACTIVE=true
 TINEX_USERNAME=your-username
 TINEX_PASSWORD=your-password
@@ -46,65 +70,152 @@ TINEX_DEFAULT_PARCEL_SIZE_ID=3
 TINEX_BARCODE_PREFIX=TINX_
 TINEX_ORDER_NUMBER_PREFIX=ORD-
 
-# Alonomic (Alopeyk)
-ALONOMIC_ACTIVE=true
-ALONOMIC_EMAIL=your-email
-ALONOMIC_PASSWORD=your-password
+# ─── SnappBox ─────────────────────────────────────────
+SNAPPBOX_ACTIVE=true
+SNAPPBOX_API_BASE_URL=https://api.snappbox.com
+SNAPPBOX_WEBHOOK_TOKEN=your-webhook-token
+
+# ─── Forward ──────────────────────────────────────────
+FORWARD_ACTIVE=true
+FORWARD_USERNAME=your-username
+FORWARD_PASSWORD=your-password
+FORWARD_SENDER_PHONE=09120000000
+FORWARD_SENDER_ADDRESS=Tehran, ...
+FORWARD_SENDER_POSTAL_CODE=1234567890
 ```
 
+---
+
 ## Usage
+
+### Basic usage
 
 ```php
 use Planx\Shipping\Facades\Shipping;
 
-// Get a driver
+// Resolve a driver by name
 $shipping = Shipping::driver('tinex');
 
-// Submit an order
+// Submit an order (driver-specific payload)
 $result = $shipping->submit($order, [
     'parcel_size_id' => 3,
     'is_self_pickup' => true,
 ]);
 ```
 
-### SnappBox Webhooks
-
-SnappBox sends real-time status updates via webhook. Add this route to your `routes/api.php`:
+### Tinex (Next One) — Parcel Size Options
 
 ```php
-Route::post('snappboxwebhooks/{webhookType}', [SnappBoxWebhookController::class, 'handle'])
-    ->middleware([SnappBoxWebhookAuthMiddleware::class]);
+$sizes = \Planx\Shipping\Drivers\TinexDriver::getSizeOptions();
+// [1 => 'بسته سایز 1 (10×15×10)', 2 => 'بسته سایز 2 (15×20×10)', ...]
 ```
 
-Supported webhook types:
+### SnappBox — Webhook Handling
 
-| Webhook | Event |
-|---------|-------|
-| `accepted` | Biker allocated to order |
-| `arrived` | Biker arrived at pickup |
-| `pickedup` | Package picked up |
-| `arrivedAtDropOff` | Biker arrived at drop-off |
-| `delivered` | Package delivered |
-| `canceled` | Order cancelled |
-| `canceled-by-system` | System cancelled (no biker) |
-| `canceled-allocation` | Biker cancelled allocation |
-| `invoice-update` | Invoice status updated |
-| `failed-deliver` | Delivery failed |
-| `failed-deliver-add-return` | Return added after failure |
-| `failed-deliver-return-to-source` | Package returned to source |
+SnappBox sends real-time delivery status updates to your server. Register the webhook route:
 
-## Development
-
-```bash
-composer install
+```php
+// routes/api.php
+Route::post('snappboxwebhooks/{webhookType}', [
+    \Planx\Shipping\Http\Controllers\SnappBoxWebhookController::class, 'handle'
+])->middleware([
+    \Planx\Shipping\Http\Middleware\SnappBoxWebhookAuthMiddleware::class
+]);
 ```
 
-### Adding a new driver
+**Supported webhook types:**
 
-1. Create a class in `src/Drivers/` implementing `Planx\Shipping\Contracts\ShippingDriver`
-2. Add the driver config to `config/shipping.php`
-3. Use it via `Shipping::driver('your-driver')`
+| Type | Event |
+|------|-------|
+| `accepted` | Biker assigned to the order |
+| `arrived` | Biker arrived at pickup location |
+| `pickedup` | Package picked up by biker |
+| `arrivedAtDropOff` | Biker arrived at drop-off location |
+| `delivered` | Package successfully delivered |
+| `canceled` | Order cancelled by user |
+| `canceled-by-system` | Order cancelled by system (no biker accepted) |
+| `canceled-allocation` | Biker cancelled the allocation |
+| `invoice-update` | Invoice status changed |
+| `failed-deliver` | Delivery attempt failed |
+| `failed-deliver-add-return` | Return label created after failed delivery |
+| `failed-deliver-return-to-source` | Package returned to sender |
+
+---
+
+## Creating a Custom Driver
+
+1. **Implement the interface**
+
+```php
+use Planx\Shipping\Contracts\ShippingDriver;
+
+class MyCourierDriver implements ShippingDriver
+{
+    public function createParcel(array $payload): array { /* ... */ }
+    public function updateParcel(int|string $id, array $payload): array { /* ... */ }
+    public function getParcel(int|string $id): array { /* ... */ }
+    public function deleteParcel(int|string $id): array { /* ... */ }
+    public function getDays(): array { /* ... */ }
+    public function getDaysIndex(): array { /* ... */ }
+}
+```
+
+2. **Register in `config/shipping.php`**
+
+```php
+'drivers' => [
+    'mycourier' => [
+        'class' => \App\Shipping\MyCourierDriver::class,
+        'config' => [
+            'api_key' => env('MYCOURIER_API_KEY'),
+        ],
+    ],
+],
+```
+
+3. **Use it**
+
+```php
+Shipping::driver('mycourier')->createParcel([...]);
+```
+
+---
+
+## Architecture
+
+```
+src/
+├── Contracts/
+│   └── ShippingDriver.php          # Driver interface
+├── Drivers/
+│   ├── AlonomicDriver.php          # Alopeyk integration
+│   ├── ForwardDriver.php           # Forward integration
+│   ├── SnappBoxDriver.php          # SnappBox + webhooks
+│   └── TinexDriver.php             # Next One (Tinex) integration
+├── Facades/
+│   └── Shipping.php                # Facade for ShippingManager
+├── Providers/
+│   └── ShippingServiceProvider.php # Auto-discovery service provider
+└── ShippingManager.php             # Driver resolution & management
+```
+
+---
+
+## Requirements
+
+- PHP `>= 8.2`
+- Laravel `^10.0 | ^11.0 | ^12.0`
+
+---
+
+## Changelog
+
+See [CHANGELOG](CHANGELOG.md) for recent changes.
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a PR on [GitHub](https://github.com/devmapr/laravel-shipping).
 
 ## License
 
-MIT
+This package is open-source software licensed under the [MIT license](LICENSE).

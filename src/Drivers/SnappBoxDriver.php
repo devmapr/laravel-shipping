@@ -6,7 +6,9 @@ namespace Planx\Shipping\Drivers;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
 use Planx\Shipping\Contracts\ShippingDriver;
+use Throwable;
 
 /**
  * SnappBox Shipping Driver.
@@ -91,9 +93,9 @@ class SnappBoxDriver implements ShippingDriver
      *
      * @param  string  $webhookType  URL fragment (e.g. 'delivered', 'accepted')
      * @param  array<string,mixed>  $payload  Raw JSON payload
-     * @return array<string,mixed>  Response for the controller
+     * @return array<string,mixed> Response for the controller
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function handleWebhook(string $webhookType, array $payload): array
     {
@@ -113,7 +115,7 @@ class SnappBoxDriver implements ShippingDriver
             ]);
 
             return ['success' => true, 'message' => 'Webhook received and processed'];
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::error('SnappBox webhook failed', [
                 'type' => $webhookType,
                 'error' => $e->getMessage(),
@@ -131,7 +133,7 @@ class SnappBoxDriver implements ShippingDriver
     /**
      * Validate the webhook payload has minimum required fields.
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     private function validatePayload(string $webhookType, array $payload): void
     {
@@ -143,7 +145,7 @@ class SnappBoxDriver implements ShippingDriver
 
         $hasRef = '' !== ($payload['customerRefId'] ?? '');
         $hasRefs = isset($payload['customerRefIds']) && is_array($payload['customerRefIds']) && [] !== $payload['customerRefIds'];
-        if (! $hasRef && ! $hasRefs) {
+        if ( ! $hasRef && ! $hasRefs) {
             $errors[] = 'Missing required field: customerRefId or customerRefIds';
         }
 
@@ -152,7 +154,7 @@ class SnappBoxDriver implements ShippingDriver
         }
 
         if ([] !== $errors) {
-            throw new \InvalidArgumentException('Validation failed: ' . implode('; ', $errors));
+            throw new InvalidArgumentException('Validation failed: ' . implode('; ', $errors));
         }
     }
 
