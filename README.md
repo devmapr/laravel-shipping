@@ -247,6 +247,10 @@ src/
 
 ---
 
+## Changelog
+
+See [CHANGELOG](CHANGELOG.md) for recent changes.
+
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a PR on [GitHub](https://github.com/devmapr/laravel-shipping).

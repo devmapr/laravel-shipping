@@ -28,6 +28,9 @@
         "illuminate/database": "^10.0|^11.0|^12.0",
         "illuminate/log": "^10.0|^11.0|^12.0"
     },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5|^11.0"
+    },
     "support": {
         "issues": "https://github.com/devmapr/laravel-shipping/issues",
         "source": "https://github.com/devmapr/laravel-shipping"
