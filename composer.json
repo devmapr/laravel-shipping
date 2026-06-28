@@ -41,6 +41,11 @@
             "Planx\\Shipping\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Planx\\Shipping\\Tests\\": "tests/"
+        }
+    },
     "extra": {
         "laravel": {
             "providers": [

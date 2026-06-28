@@ -43,8 +43,8 @@ class ShippingManagerTest extends TestCase
             'class' => TinexDriver::class,
             'config' => [
                 'base_url' => 'https://test.tinex.com',
-                'username' => 'test',
-                'password' => 'test',
+                'username' => '',
+                'password' => '',
             ],
         ]);
 
