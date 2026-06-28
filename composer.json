@@ -1,5 +1,5 @@
 {
-    "name": "planx/laravel-shipping",
+    "name": "devmapr/laravel-shipping",
     "description": "Pluggable shipping manager for Laravel. Drivers: Alonomic, Tinex (Next One), SnappBox, and Forward.",
     "type": "library",
     "license": "MIT",
