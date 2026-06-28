@@ -6,7 +6,7 @@ namespace Planx\Shipping\Drivers;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use Log;
+use Illuminate\Support\Facades\Log;
 use Planx\Shipping\Contracts\ShippingDriver;
 use Throwable;
 
