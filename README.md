@@ -112,15 +112,54 @@ $sizes = \Planx\Shipping\Drivers\TinexDriver::getSizeOptions();
 
 ### SnappBox — Webhook Handling
 
-SnappBox sends real-time delivery status updates to your server. Register the webhook route:
+SnappBox sends real-time delivery status updates to your server. All webhook logic is handled by `SnappBoxDriver::handleWebhook()`.
+
+**Create a simple controller in your app:**
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Planx\Shipping\Drivers\SnappBoxDriver;
+
+class SnappBoxWebhookController extends Controller
+{
+    public function __construct(
+        private readonly SnappBoxDriver $driver,
+    ) {}
+
+    public function __invoke(Request $request, string $webhookType): JsonResponse
+    {
+        $payload = $request->json()->all();
+
+        if ( ! is_array($payload)) {
+            return response()->json(['success' => false, 'message' => 'Invalid JSON'], 400);
+        }
+
+        try {
+            $result = $this->driver->handleWebhook($webhookType, $payload);
+            return response()->json($result);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => 'Internal error'], 200);
+        }
+    }
+}
+```
+
+**Register the route:**
 
 ```php
 // routes/api.php
-Route::post('snappboxwebhooks/{webhookType}', [
-    \Planx\Shipping\Http\Controllers\SnappBoxWebhookController::class, 'handle'
-])->middleware([
-    \Planx\Shipping\Http\Middleware\SnappBoxWebhookAuthMiddleware::class
-]);
+Route::post('snappboxwebhooks/{webhookType}', SnappBoxWebhookController::class);
+```
+
+Protected by a Bearer token set in your `.env`:
+
+```env
+SNAPPBOX_WEBHOOK_TOKEN=your-secret-token
 ```
 
 **Supported webhook types:**
@@ -208,14 +247,10 @@ src/
 
 ---
 
-## Changelog
-
-See [CHANGELOG](CHANGELOG.md) for recent changes.
-
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a PR on [GitHub](https://github.com/devmapr/laravel-shipping).
 
 ## License
 
-This package is open-source software licensed under the [MIT license](LICENSE).
+This package is open-source software licensed under the MIT license.
