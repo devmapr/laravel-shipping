@@ -29,33 +29,41 @@ class SnappBoxDriverTest extends TestCase
         );
     }
 
-    public function test_create_parcel_returns_pending_message(): void
+    public function test_create_parcel_without_auth_returns_error(): void
     {
         $result = $this->driver->createParcel([]);
 
         $this->assertIsArray($result);
-        $this->assertStringContainsString('pending', $result['message']);
+        // Without configured credentials, API call fails with auth error
+        $this->assertArrayHasKey('error', $result);
+        $this->assertArrayHasKey('message', $result['error']);
     }
 
-    public function test_update_parcel_not_supported(): void
+    public function test_update_parcel_without_auth_returns_error(): void
     {
         $result = $this->driver->updateParcel(1, []);
 
-        $this->assertStringContainsString('Not supported', $result['message']);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('error', $result);
+        $this->assertArrayHasKey('message', $result['error']);
     }
 
-    public function test_get_parcel_not_supported(): void
+    public function test_get_parcel_without_auth_returns_error(): void
     {
         $result = $this->driver->getParcel(1);
 
-        $this->assertStringContainsString('Not supported', $result['message']);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('error', $result);
+        $this->assertArrayHasKey('message', $result['error']);
     }
 
-    public function test_delete_parcel_not_supported(): void
+    public function test_delete_parcel_without_auth_returns_error(): void
     {
         $result = $this->driver->deleteParcel(1);
 
-        $this->assertStringContainsString('Not supported', $result['message']);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('error', $result);
+        $this->assertArrayHasKey('message', $result['error']);
     }
 
     public function test_get_days_returns_empty_array(): void
@@ -227,6 +235,94 @@ class SnappBoxDriverTest extends TestCase
         ]);
 
         $this->assertTrue($result['success']);
+    }
+
+    // endregion
+
+    // region New API methods (without credentials — expect error responses)
+
+    public function test_get_delivery_categories_without_auth_returns_error(): void
+    {
+        $result = $this->driver->getDeliveryCategories(35.757523, 51.409911);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('error', $result);
+    }
+
+    public function test_get_wallet_balance_without_auth_returns_error(): void
+    {
+        $result = $this->driver->getWalletBalance();
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('error', $result);
+    }
+
+    public function test_get_pricing_without_auth_returns_error(): void
+    {
+        $result = $this->driver->getPricing([
+            'city' => 'tehran',
+            'deliveryCategory' => 'bike',
+            'terminals' => [
+                ['type' => 'pickup', 'latitude' => '35.757', 'longitude' => '51.409', 'address' => 'test'],
+                ['type' => 'dropoff', 'latitude' => '35.758', 'longitude' => '51.410', 'address' => 'test2'],
+            ],
+        ]);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('error', $result);
+    }
+
+    public function test_get_order_by_ref_id_without_auth_returns_error(): void
+    {
+        $result = $this->driver->getOrderByRefId('ref-123');
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('error', $result);
+    }
+
+    public function test_get_order_list_without_auth_returns_error(): void
+    {
+        $result = $this->driver->getOrderList();
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('error', $result);
+    }
+
+    public function test_get_order_location_without_auth_returns_error(): void
+    {
+        $result = $this->driver->getOrderLocation(123);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('error', $result);
+    }
+
+    public function test_get_order_events_without_auth_returns_error(): void
+    {
+        $result = $this->driver->getOrderEvents(123);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('error', $result);
+    }
+
+    public function test_submit_without_auth_returns_error(): void
+    {
+        $order = (object) [
+            'id' => 1,
+            'grand_total' => 150000,
+            'payment_type' => 'prepaid',
+            'shipping_first_name' => 'Ali',
+            'shipping_last_name' => 'Rezaei',
+            'shipping_lat' => '35.758',
+            'shipping_lng' => '51.410',
+            'shipping_address' => 'Tehran, Vanak',
+            'shipping_weight' => 500,
+            'mobile' => '09121112233',
+        ];
+
+        $result = $this->driver->submit($order, []);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('error', $result);
     }
 
     // endregion

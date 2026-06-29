@@ -45,8 +45,21 @@ return [
             'class' => Planx\Shipping\Drivers\SnappBoxDriver::class,
             'config' => [
                 'active' => env('SNAPPBOX_ACTIVE', false),
-                'api_base_url' => env('SNAPPBOX_API_BASE_URL', ''),
+                'api_base_url' => env('SNAPPBOX_API_BASE_URL', 'https://stg-api.snappbox.com'),
+                'api_token' => env('SNAPPBOX_API_TOKEN', ''),
+                'username' => env('SNAPPBOX_USERNAME', ''),
+                'password' => env('SNAPPBOX_PASSWORD', ''),
                 'webhook_token' => env('SNAPPBOX_WEBHOOK_TOKEN', ''),
+                // Default origin / sender information
+                'origin_lat' => env('SNAPPBOX_ORIGIN_LAT', ''),
+                'origin_lng' => env('SNAPPBOX_ORIGIN_LNG', ''),
+                'origin_address' => env('SNAPPBOX_ORIGIN_ADDRESS', ''),
+                'origin_contact_name' => env('SNAPPBOX_ORIGIN_CONTACT_NAME', ''),
+                'origin_phone' => env('SNAPPBOX_ORIGIN_PHONE', ''),
+                // Default delivery settings
+                'delivery_category' => env('SNAPPBOX_DELIVERY_CATEGORY', 'bike'),
+                'city' => env('SNAPPBOX_CITY', 'tehran'),
+                'ref_id_prefix' => env('SNAPPBOX_REF_ID_PREFIX', 'SBX-'),
             ],
         ],
     ],
